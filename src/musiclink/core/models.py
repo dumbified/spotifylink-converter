@@ -17,3 +17,18 @@ class SpotifyLink:
 
     kind: Literal["track", "short"]
     url: str
+
+
+@dataclass(frozen=True)
+class TrackInfo:
+    """What we know about a song after reading its Spotify page.
+
+    Only `title` is guaranteed. The rest is None when Spotify didn't tell us
+    (for example when we had to fall back to the oEmbed endpoint).
+    """
+
+    title: str
+    artist: str | None = None  # several artists come as one string: "A, B"
+    album: str | None = None
+    year: int | None = None
+    duration_seconds: int | None = None
