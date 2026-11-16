@@ -43,3 +43,33 @@ class Candidate:
     url: str  # clean https://music.apple.com/... link, safe to send to the user
     album: str | None = None
     duration_seconds: int | None = None
+
+
+@dataclass(frozen=True)
+class ScoredCandidate:
+    """A Candidate plus how sure we are that it is the right song (0.0 to 1.0)."""
+
+    candidate: Candidate
+    score: float
+
+
+# What can come out of a conversion:
+#   "match"          one confident answer, in `matches`
+#   "options"        not sure; the best few guesses are in `matches`
+#   "not_found"      Apple Music has nothing close enough
+#   "no_link"        the message had no Spotify track link in it
+#   "spotify_error"  could not read the song from Spotify
+#   "apple_error"    could not search Apple Music
+ConversionStatus = Literal[
+    "match", "options", "not_found", "no_link", "spotify_error", "apple_error"
+]
+
+
+@dataclass(frozen=True)
+class ConversionResult:
+    """The full answer to "convert this message". Front-ends turn this into a reply."""
+
+    status: ConversionStatus
+    track: TrackInfo | None = None  # what we read from Spotify, if we got that far
+    matches: tuple[ScoredCandidate, ...] = ()  # best first
+    detail: str = ""  # a short technical reason for errors, for logs
