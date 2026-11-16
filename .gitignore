@@ -11,5 +11,9 @@ __pycache__/
 .ruff_cache/
 dist/
 
+# Logs
+*.log
+*.log.*
+
 # macOS
 .DS_Store

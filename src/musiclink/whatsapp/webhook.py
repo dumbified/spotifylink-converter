@@ -117,7 +117,9 @@ async def receive_webhook(request: Request, background: BackgroundTasks) -> dict
         raise HTTPException(status_code=400, detail="Body is not JSON") from error
 
     # 3. Queue the work and answer straight away.
-    for message in extract_messages(payload):
+    messages = extract_messages(payload)
+    logger.info("Webhook received from Meta with %d message(s)", len(messages))
+    for message in messages:
         if should_handle(message, state):
             background.add_task(handle_message, message, state)
 
@@ -200,6 +202,7 @@ async def handle_message(message: IncomingMessage, state: BotState) -> None:
             logger.info("Handled a message: %s %s", result.status, result.detail)
 
         await state.whatsapp.send_text(message.sender, reply)
+        logger.info("Reply sent to %s", mask(message.sender))
     except WhatsAppError as error:
         logger.error("Could not send the reply: %s", error)
     except Exception:

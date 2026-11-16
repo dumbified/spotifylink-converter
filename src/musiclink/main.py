@@ -11,6 +11,7 @@ import logging
 import sys
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
+from logging.handlers import RotatingFileHandler
 
 import httpx
 import uvicorn
@@ -137,8 +138,14 @@ def run() -> None:
         print("\nIs there a .env file in this folder? Create it with:  cp .env.example .env")
         sys.exit(1)
 
+    # Log to the terminal and also to a small file, so there is a record to
+    # look back at. The file is git-ignored and is capped at about 1 MB.
+    log_format = "%(asctime)s %(levelname)s %(name)s: %(message)s"
+    log_file = RotatingFileHandler("musiclink.log", maxBytes=500_000, backupCount=1)
     logging.basicConfig(
-        level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s"
+        level=logging.INFO,
+        format=log_format,
+        handlers=[logging.StreamHandler(), log_file],
     )
     # httpx logs every URL it requests at INFO level. Quieten it.
     logging.getLogger("httpx").setLevel(logging.WARNING)
