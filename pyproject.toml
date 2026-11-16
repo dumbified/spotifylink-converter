@@ -15,6 +15,8 @@ dependencies = [
 [project.scripts]
 # Lets you type "uv run musiclink ..." in the terminal
 musiclink = "musiclink.core.__main__:main"
+# Starts the WhatsApp bot server: "uv run musiclink-bot"
+musiclink-bot = "musiclink.main:run"
 
 [build-system]
 requires = ["uv_build>=0.13.8,<0.14.0"]
@@ -37,4 +39,5 @@ line-length = 100
 select = ["E", "F", "I", "B", "S", "UP"]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/*" = ["S101"]  # tests are allowed to use assert
+# tests may use assert (S101) and contain made-up secrets (S105, S106)
+"tests/*" = ["S101", "S105", "S106"]
