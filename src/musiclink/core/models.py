@@ -32,3 +32,14 @@ class TrackInfo:
     album: str | None = None
     year: int | None = None
     duration_seconds: int | None = None
+
+
+@dataclass(frozen=True)
+class Candidate:
+    """One song from an Apple Music search: a possible match for a TrackInfo."""
+
+    title: str
+    artist: str
+    url: str  # clean https://music.apple.com/... link, safe to send to the user
+    album: str | None = None
+    duration_seconds: int | None = None
