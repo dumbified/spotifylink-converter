@@ -8,12 +8,14 @@ being a single global app wired to the real thing.
 """
 
 import logging
+import sys
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
 import httpx
 import uvicorn
 from fastapi import FastAPI
+from pydantic import ValidationError
 
 from musiclink.config import Settings
 from musiclink.core.http import TIMEOUT_SECONDS, USER_AGENT
@@ -74,6 +76,19 @@ def create_app(
 
 def run() -> None:
     """Start the server. This is what `uv run musiclink-bot` calls."""
+    # Check the settings up front, so a missing value gives a short, readable
+    # message instead of a long technical error.
+    try:
+        Settings()
+    except ValidationError as error:
+        print("The bot can't start because of these settings in your .env file:\n")
+        for problem in error.errors():
+            name = str(problem["loc"][0]).upper()
+            reason = "is missing" if problem["type"] == "missing" else problem["msg"]
+            print(f"  {name}: {reason}")
+        print("\nIs there a .env file in this folder? Create it with:  cp .env.example .env")
+        sys.exit(1)
+
     logging.basicConfig(
         level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s"
     )
