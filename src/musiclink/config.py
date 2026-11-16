@@ -45,6 +45,22 @@ class Settings(BaseSettings):
     # Version of Meta's Graph API. The Meta dashboard shows the current one.
     graph_api_version: str = Field(default="v24.0", pattern=r"^v\d{1,3}\.\d$")
 
+    # --- Where and how the server runs (the defaults suit your own computer) ---
+
+    # 127.0.0.1 = reachable from this computer only (right when a tunnel on
+    # the same machine forwards to it). A hosting provider needs 0.0.0.0,
+    # meaning "accept connections from outside", because its own front door
+    # passes requests in from another machine.
+    bind_host: str = Field(default="127.0.0.1", pattern=r"^(127\.0\.0\.1|0\.0\.0\.0)$")
+
+    # Hosting providers such as Render tell the app which port to use
+    # through the PORT environment variable.
+    port: int = Field(default=8000, ge=1, le=65535)
+
+    # Also write logs to this file. Leave empty to log to the terminal only,
+    # which is what hosting providers expect (they collect terminal output).
+    log_file: str = "musiclink.log"
+
     @field_validator("allowed_senders")
     @classmethod
     def _check_allowed_senders(cls, value: str) -> str:

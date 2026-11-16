@@ -128,7 +128,7 @@ def run() -> None:
     # Check the settings up front, so a missing value gives a short, readable
     # message instead of a long technical error.
     try:
-        Settings()
+        settings = Settings()
     except ValidationError as error:
         print("The bot can't start because of these settings in your .env file:\n")
         for problem in error.errors():
@@ -138,29 +138,27 @@ def run() -> None:
         print("\nIs there a .env file in this folder? Create it with:  cp .env.example .env")
         sys.exit(1)
 
-    # Log to the terminal and also to a small file, so there is a record to
-    # look back at. The file is git-ignored and is capped at about 1 MB.
-    log_format = "%(asctime)s %(levelname)s %(name)s: %(message)s"
-    log_file = RotatingFileHandler("musiclink.log", maxBytes=500_000, backupCount=1)
+    # Always log to the terminal. If a log file is configured, write there
+    # too, so there is a record to look back at (capped at about 1 MB).
+    handlers: list[logging.Handler] = [logging.StreamHandler()]
+    if settings.log_file:
+        handlers.append(RotatingFileHandler(settings.log_file, maxBytes=500_000, backupCount=1))
     logging.basicConfig(
         level=logging.INFO,
-        format=log_format,
-        handlers=[logging.StreamHandler(), log_file],
+        format="%(asctime)s %(levelname)s %(name)s: %(message)s",
+        handlers=handlers,
     )
     # httpx logs every URL it requests at INFO level. Quieten it.
     logging.getLogger("httpx").setLevel(logging.WARNING)
 
-    # 127.0.0.1 means "this computer only". The tunnel connects from this
-    # machine, so nothing else on your Wi-Fi can reach the server directly.
-    #
     # access_log=False: uvicorn's access log prints the full address of every
     # request, and Meta's verification request carries our verify token in its
     # address. Secrets must not end up in logs, so we log events ourselves.
     uvicorn.run(
         "musiclink.main:create_app",
         factory=True,
-        host="127.0.0.1",
-        port=8000,
+        host=settings.bind_host,
+        port=settings.port,
         access_log=False,
     )
 

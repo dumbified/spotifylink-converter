@@ -128,6 +128,30 @@ Temporary access tokens expire after about a day; generate a new one and restart
 the bot when replies stop arriving. The free tunnel address also changes each
 time the tunnel restarts, so the Callback URL needs updating then.
 
+## Host it on Render
+
+Running on your own computer needs a tunnel whose address keeps changing.
+Hosting gives the bot a fixed address and keeps it available when your
+computer is off. The repo includes a `Dockerfile` and a `render.yaml` for
+[Render](https://render.com)'s free tier.
+
+1. **Get a permanent access token.** In Meta Business Settings, create a system
+   user, give it your app and WhatsApp account, and generate a token that never
+   expires with the `whatsapp_business_messaging` and
+   `whatsapp_business_management` permissions.
+2. **Push this repo to GitHub.**
+3. **Create the service.** In Render choose **New > Blueprint**, pick the repo,
+   and enter the five secret values when asked. They are stored by Render, not
+   in the repo.
+4. **Point Meta at it.** Once deployed, Render shows an address like
+   `https://musiclink-xxxx.onrender.com`. In the Meta dashboard set the Callback
+   URL to that address plus `/webhook` and the privacy policy URL to it plus
+   `/privacy`.
+
+The free tier puts the service to sleep after a period with no traffic. The
+first message after that wakes it, so that reply takes longer; Meta re-sends a
+webhook it got no answer to, and the bot ignores duplicates.
+
 ## Security
 
 - **Secrets** are read from environment variables (`.env` is git-ignored) and are masked if printed.

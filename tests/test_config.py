@@ -24,6 +24,9 @@ def test_valid_settings_and_defaults():
     assert settings.itunes_country == "us"
     assert settings.graph_api_version == "v24.0"
     assert settings.allowed_sender_set == {"6591234567"}
+    # By default the server is only reachable from this computer.
+    assert settings.bind_host == "127.0.0.1"
+    assert settings.port == 8000
 
 
 def test_secrets_are_hidden_when_printed():
@@ -47,11 +50,22 @@ def test_phone_numbers_are_tidied():
         {"itunes_country": "usa"},
         {"graph_api_version": "24"},
         {"graph_api_version": "v24.0/../../x"},
+        {"bind_host": "example.com"},
+        {"port": 0},
+        {"port": 70000},
     ],
 )
 def test_bad_values_are_refused(changes):
     with pytest.raises(ValidationError):
         make(**changes)
+
+
+def test_hosting_values_come_from_the_environment(monkeypatch):
+    monkeypatch.setenv("PORT", "10000")
+    monkeypatch.setenv("BIND_HOST", "0.0.0.0")
+    monkeypatch.setenv("LOG_FILE", "")
+    settings = make()
+    assert (settings.bind_host, settings.port, settings.log_file) == ("0.0.0.0", 10000, "")
 
 
 def test_missing_values_are_refused(monkeypatch):

@@ -1,0 +1,12 @@
+# Keep secrets, local state and anything the app doesn't need out of the image.
+.env
+.env.*
+.git
+.github
+.venv
+.pytest_cache
+.ruff_cache
+__pycache__
+*.pyc
+*.log
+tests

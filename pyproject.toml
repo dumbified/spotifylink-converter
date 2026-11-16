@@ -39,5 +39,6 @@ line-length = 100
 select = ["E", "F", "I", "B", "S", "UP"]
 
 [tool.ruff.lint.per-file-ignores]
-# tests may use assert (S101) and contain made-up secrets (S105, S106)
-"tests/*" = ["S101", "S105", "S106"]
+# tests may use assert (S101), contain made-up secrets (S105, S106)
+# and mention the 0.0.0.0 address (S104)
+"tests/*" = ["S101", "S104", "S105", "S106"]

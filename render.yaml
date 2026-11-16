@@ -1,0 +1,27 @@
+# Render "blueprint": describes the service so Render can create it from this repo.
+# Docs: https://render.com/docs/blueprint-spec
+services:
+  - type: web
+    name: musiclink
+    runtime: docker
+    plan: free
+    region: singapore
+    healthCheckPath: /health
+    envVars:
+      # "sync: false" means the value is NOT stored in this file. Render asks
+      # you to type it into its dashboard when the service is created.
+      - key: WHATSAPP_VERIFY_TOKEN
+        sync: false
+      - key: WHATSAPP_APP_SECRET
+        sync: false
+      - key: WHATSAPP_ACCESS_TOKEN
+        sync: false
+      - key: WHATSAPP_PHONE_NUMBER_ID
+        sync: false
+      - key: ALLOWED_SENDERS
+        sync: false
+      # Not secret, so they can live here.
+      - key: ITUNES_COUNTRY
+        value: us
+      - key: GRAPH_API_VERSION
+        value: v24.0
