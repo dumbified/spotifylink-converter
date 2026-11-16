@@ -71,14 +71,58 @@ The tunnel prints an address like `https://something.trycloudflare.com`.
 
 ### 4. Register the webhook
 
-1. In the Meta dashboard open **WhatsApp > Configuration**.
+1. In the Meta dashboard open the WhatsApp use case, then **Step 2. Production setup > Configure Webhooks**.
 2. Set **Callback URL** to the tunnel address followed by `/webhook`.
-3. Set **Verify token** to the `WHATSAPP_VERIFY_TOKEN` value from your `.env`.
-4. Save, then subscribe to the **messages** webhook field.
+3. Set **Verify token** to the `WHATSAPP_VERIFY_TOKEN` value from your `.env` (the value only, no quotes).
+4. Click **Verify and save**, then subscribe to the **messages** webhook field.
 
-### 5. Use it
+The bot logs `Webhook verified by Meta` when this succeeds.
 
-Send a Spotify song link to the test number from your own WhatsApp.
+### 5. Publish the app
+
+An unpublished app only receives test webhooks sent from the dashboard.
+
+1. Under **App settings > Basic**, set **Privacy policy URL** to the tunnel address followed by `/privacy` and save.
+2. Open **Publish** and publish the app.
+
+No business phone number, payment method or business verification is needed for the test number.
+
+### 6. Subscribe the app to the WhatsApp account
+
+This step is easy to miss: the webhook can be verified and the `messages` field
+ticked, and Meta will still deliver nothing until the app is subscribed to the
+WhatsApp Business Account that owns the test number. The dashboard did not do
+this automatically.
+
+Check which apps are subscribed (the account ID is shown on the API Setup page):
+
+```bash
+curl -H "Authorization: Bearer $WHATSAPP_ACCESS_TOKEN" \
+  "https://graph.facebook.com/v24.0/<WHATSAPP_BUSINESS_ACCOUNT_ID>/subscribed_apps"
+```
+
+If your app is not listed, subscribe it:
+
+```bash
+curl -X POST -H "Authorization: Bearer $WHATSAPP_ACCESS_TOKEN" \
+  "https://graph.facebook.com/v24.0/<WHATSAPP_BUSINESS_ACCOUNT_ID>/subscribed_apps"
+```
+
+### 7. Use it
+
+Send a Spotify song link to the test number from your own WhatsApp. The reply
+arrives in the same chat a few seconds later.
+
+### Troubleshooting
+
+The bot logs to the terminal and to `musiclink.log`.
+
+| Log line | Meaning |
+|---|---|
+| `Webhook verification failed` | The verify token in Meta does not match `.env` |
+| Nothing when you send a message | Meta is not delivering: check steps 5 and 6, and that the tunnel address is current |
+| `Ignored a message from a sender not on the list` | `ALLOWED_SENDERS` does not match your number |
+| `Could not send the reply` | Meta refused the reply; the line says why (often an expired access token) |
 
 Temporary access tokens expire after about a day; generate a new one and restart
 the bot when replies stop arriving. The free tunnel address also changes each
