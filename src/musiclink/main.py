@@ -15,6 +15,7 @@ from contextlib import asynccontextmanager
 import httpx
 import uvicorn
 from fastapi import FastAPI
+from fastapi.responses import HTMLResponse
 from pydantic import ValidationError
 
 from musiclink.config import Settings
@@ -71,7 +72,54 @@ def create_app(
         """A harmless address for checking the server (and the tunnel) is up."""
         return {"status": "ok"}
 
+    @app.get("/privacy", response_class=HTMLResponse)
+    async def privacy() -> str:
+        """A privacy policy page. Meta requires a link to one before an app can be published."""
+        return PRIVACY_POLICY
+
     return app
+
+
+PRIVACY_POLICY = """<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>musiclink privacy policy</title>
+<style>
+body { font-family: system-ui, sans-serif; max-width: 40rem; margin: 2rem auto;
+       padding: 0 1rem; line-height: 1.5; }
+</style>
+</head>
+<body>
+<h1>musiclink privacy policy</h1>
+<p>musiclink is a personal, non-commercial WhatsApp bot that converts Spotify
+song links into Apple Music links. It only responds to phone numbers its
+operator has explicitly allowed.</p>
+<h2>What is processed</h2>
+<ul>
+<li>The text of a message sent to the bot, to find a Spotify link in it.</li>
+<li>The sender's phone number, to check it is allowed and to send the reply.</li>
+</ul>
+<h2>What is stored</h2>
+<p>Nothing is saved to a database or to disk. Message text is discarded as
+soon as the reply is sent. Message IDs are kept in memory for a short time to
+avoid answering the same message twice. Logs record that a message was handled
+and only the last four digits of the phone number, never the message text.</p>
+<h2>What is shared</h2>
+<ul>
+<li>Spotify receives a request for the public page of the linked song.</li>
+<li>Apple receives a search for the song's title and artist.</li>
+<li>Meta (WhatsApp) delivers the incoming message and the reply.</li>
+</ul>
+<p>No phone numbers or message text are sent to Spotify or Apple, and nothing
+is sold or used for advertising.</p>
+<h2>Contact</h2>
+<p>Questions or removal requests can be sent to the bot's operator through the
+WhatsApp number the bot uses.</p>
+</body>
+</html>
+"""
 
 
 def run() -> None:

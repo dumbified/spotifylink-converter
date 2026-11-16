@@ -309,6 +309,13 @@ def test_health(client):
     assert client.get("/health").json() == {"status": "ok"}
 
 
+def test_privacy_policy_page(client):
+    response = client.get("/privacy")
+    assert response.status_code == 200
+    assert response.headers["content-type"].startswith("text/html")
+    assert "privacy policy" in response.text
+
+
 @pytest.mark.parametrize("path", ["/docs", "/redoc", "/openapi.json"])
 def test_documentation_pages_are_switched_off(client, path):
     assert client.get(path).status_code == 404
