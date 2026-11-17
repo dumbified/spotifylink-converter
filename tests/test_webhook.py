@@ -309,6 +309,10 @@ def test_health(client):
     assert client.get("/health").json() == {"status": "ok"}
 
 
+def test_health_answers_head_for_uptime_monitors(client):
+    assert client.head("/health").status_code == 200
+
+
 def test_privacy_policy_page(client):
     response = client.get("/privacy")
     assert response.status_code == 200

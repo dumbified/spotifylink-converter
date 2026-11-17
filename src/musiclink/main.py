@@ -68,7 +68,8 @@ def create_app(
     )
     app.include_router(router)
 
-    @app.get("/health")
+    # HEAD as well as GET, because uptime monitors such as UptimeRobot check with HEAD.
+    @app.api_route("/health", methods=["GET", "HEAD"])
     async def health() -> dict[str, str]:
         """A harmless address for checking the server (and the tunnel) is up."""
         return {"status": "ok"}
