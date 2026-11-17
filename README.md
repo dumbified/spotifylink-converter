@@ -8,6 +8,17 @@ Bot:  Never Gonna Give You Up – Rick Astley
       https://music.apple.com/us/album/never-gonna-give-you-up/1559885420?i=1559885421
 ```
 
+## Why make this
+
+My friends use Spotify and I use Apple Music. When they send me a song on
+WhatsApp, the link opens in an app I don't have, so I end up searching for the
+song by hand.
+
+Existing converters didn't fit: Spotify's own API now requires a Premium
+account, and the free song.link API has been closed to keyless use. So this
+bot does the conversion itself, using only free public endpoints. I forward the
+Spotify link to it and it replies with the Apple Music link.
+
 ## How it works
 
 1. Find the Spotify track link in the message and validate it.
@@ -38,15 +49,15 @@ Uses Meta's official WhatsApp Cloud API and its free test number.
 2. **Fill in the settings:** `cp .env.example .env`, then follow the comments in the file.
 3. **Start the bot and a tunnel** (Meta needs a public HTTPS address):
    ```bash
-    uv run musiclink-bot
-    cloudflared tunnel --url http://localhost:8000   # in a second terminal
+     uv run musiclink-bot
+     cloudflared tunnel --url http://localhost:8000   # in a second terminal
    ```
 4. **Register the webhook** under **Configure Webhooks**: Callback URL = tunnel address + `/webhook`, Verify token = `WHATSAPP_VERIFY_TOKEN` from `.env` (value only, no quotes). Save, then subscribe to the **messages** field.
 5. **Publish the app.** Set the privacy policy URL to tunnel address + `/privacy`, then publish. An unpublished app only receives dashboard test webhooks. No business number, payment or verification is needed.
 6. **Subscribe the app to the WhatsApp Business Account.** Without this, Meta delivers nothing even with the webhook verified, and the dashboard may not do it for you:
    ```bash
-    curl -X POST -H "Authorization: Bearer $WHATSAPP_ACCESS_TOKEN" \
-      "https://graph.facebook.com/v24.0/<WHATSAPP_BUSINESS_ACCOUNT_ID>/subscribed_apps"
+     curl -X POST -H "Authorization: Bearer $WHATSAPP_ACCESS_TOKEN" \
+       "https://graph.facebook.com/v24.0/<WHATSAPP_BUSINESS_ACCOUNT_ID>/subscribed_apps"
    ```
 7. **Send a Spotify link** to the test number. The reply arrives in the same chat.
 
